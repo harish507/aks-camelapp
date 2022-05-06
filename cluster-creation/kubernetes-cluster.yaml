@@ -1,0 +1,26 @@
+---
+- hosts: localhost
+  vars:
+       location: Central India
+       resource_group: test
+       resource: MC_test_mints_centralindia
+       aks_cluster: mints-test
+       node_count: 4
+  connection: local
+  tasks:
+    - name: Create resource group
+      command: az group create -l "{{ location }}" -n "{{ resource_group }}"
+    #  azure_rm_resourcegroup:
+    #    name: "{{ resource_group }}"
+    #    location: "{{ location }}"
+      tags:
+      - skip
+    - name: Creating aks cluster
+      command: az aks create --location "{{ location }}" --resource-group "{{ resource_group }}" --name "{{ aks_cluster }}" --node-count "{{ node_count }}" --kubernetes-version 1.22.6 --generate-ssh-keys --vm-set-type AvailabilitySet
+      tags:
+      - skip
+    - name: Entering in to cluster
+      command: az aks get-credentials --resource-group "{{ resource_group }}" --name "{{ aks_cluster }}" --overwrite-existing
+      register: rg
+    - debug:
+        var: rg
